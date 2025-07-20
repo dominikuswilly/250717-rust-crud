@@ -7,9 +7,13 @@ use actix_web::{web, App, HttpServer};
 use deadpool_postgres::Pool;
 use crate::controller::{hello_controller, merk_controller};
 use crate::config::db_config;
+use log::info;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
+    env_logger::init(); 
+    info!("Starting server...");
+
     let pool: Pool = db_config::create_pool();
 
     HttpServer::new(move || {

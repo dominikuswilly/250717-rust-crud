@@ -1,5 +1,5 @@
 use actix_web::{web, HttpResponse, Responder};
-use crate::service::merk_service::{MerkPostDto, MerkService};
+use crate::service::merk_service::{MerkPostDto, MerkService, MerkPatchDto};
 use deadpool_postgres::Pool;
 
 async fn get_merks() -> impl Responder{
@@ -25,8 +25,13 @@ async fn post_merks(
         .unwrap_or_else(|_| HttpResponse::InternalServerError().finish())
 }
 
-async fn patch_merks() -> impl Responder{
-    HttpResponse::Ok().body("patch merks")
+async fn patch_merks(
+    pool: web::Data<Pool>,
+    data: web::Json<MerkPatchDto>
+) -> impl Responder{
+    MerkService::patch_merk(pool.get_ref(), data.into_inner())
+        .await
+        .unwrap_or_else(|_| HttpResponse::InternalServerError().finish())
 }
 
 async fn delete_merks(
