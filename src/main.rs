@@ -11,6 +11,7 @@ use log::info;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
+
     env_logger::init(); 
     info!("Starting server...");
 
@@ -22,6 +23,7 @@ async fn main() -> std::io::Result<()> {
             .configure(merk_controller::init_routes)
             .configure(hello_controller::init_routes)
         })
+        .workers(10)
         .bind("127.0.0.1:8080")?
         .run()
         .await

@@ -1,5 +1,6 @@
 use actix_web::{web, HttpResponse, Responder};
 use crate::service::merk_service::{MerkPostDto, MerkService, MerkPatchDto};
+use log::error;
 use deadpool_postgres::Pool;
 
 async fn get_merks() -> impl Responder{
@@ -13,16 +14,20 @@ async fn get_merks_2() -> impl Responder{
 }
 
 async fn get_merks_3(pool: web::Data<Pool>) -> impl Responder{
-    MerkService::say_merk_3(pool.get_ref()).await.unwrap_or_else(|_| HttpResponse::InternalServerError().finish())
+    MerkService::get_merk(pool.get_ref()).await.unwrap_or_else(|_| HttpResponse::InternalServerError().finish())
 }
 
 async fn post_merks(
     pool: web::Data<Pool>,
     data: web::Json<MerkPostDto>
 ) -> impl Responder{
-    MerkService::post_merk(pool.get_ref(), data.into_inner())
-        .await
-        .unwrap_or_else(|_| HttpResponse::InternalServerError().finish())
+    match MerkService::post_merk(pool.get_ref(), data.into_inner()).await {
+        Ok(response) => response,
+        Err(e) => {
+            error!("Failed to post merk: {:?}",e);
+            HttpResponse::InternalServerError().finish()
+        }
+    }
 }
 
 async fn patch_merks(
